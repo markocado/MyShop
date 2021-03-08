@@ -10,12 +10,12 @@ namespace MyShop.Web.Controllers
 {
     public class ProductManagerController : Controller
     {
-        ProductRepository context;
-        ProductCategoryRepository productCategoryContext;
+        InMemoryReposity<Product> context;
+        InMemoryReposity<ProductCategory> productCategoryContext;
         public ProductManagerController()
         {
-            context = new ProductRepository();
-            productCategoryContext = new ProductCategoryRepository();
+            context = new InMemoryReposity<Product>();
+            productCategoryContext = new InMemoryReposity<ProductCategory>();
         }
         // GET: ProductManager
         public ActionResult Index()
