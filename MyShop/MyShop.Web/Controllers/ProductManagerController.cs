@@ -33,13 +33,20 @@ namespace MyShop.Web.Controllers
             return View(productManagerVM);
         }
         [HttpPost]
-        public ActionResult Create(Product product)
+        public ActionResult Create(Product product, HttpPostedFileBase file)
         {
             if (!ModelState.IsValid)
             {
                 return View(product);
             } else
             {
+
+                if (file != null)
+                {
+                    product.Image = product.Id + System.IO.Path.GetExtension(file.FileName);
+                    file.SaveAs(Server.MapPath("//Content//ProductImages//") + product.Image);
+                }
+
                 context.Insert(product);
                 context.Commit();
                 return RedirectToAction("Index");
@@ -64,7 +71,7 @@ namespace MyShop.Web.Controllers
         }
 
         [HttpPost]
-        public ActionResult Edit(Product product, string Id)
+        public ActionResult Edit(Product product, string Id, HttpPostedFileBase file)
         {
             Product productToUpdate = context.Find(Id);
             if (product == null)
@@ -79,11 +86,18 @@ namespace MyShop.Web.Controllers
                 } 
                 else
                 {
+
+                    if (file != null)
+                    {
+                        product.Image = product.Id + System.IO.Path.GetExtension(file.FileName);
+                        file.SaveAs(Server.MapPath("//Content//ProductImages//") + product.Image);
+                    }
+
                     productToUpdate.Name = product.Name;
                     productToUpdate.Category = product.Category;
                     productToUpdate.Description = product.Description;
-                    productToUpdate.Image = product.Image;
                     productToUpdate.Price = product.Price;
+                    productToUpdate.Image = product.Image;
                     context.Update(productToUpdate);
                     context.Commit();
                     return RedirectToAction("Index");
