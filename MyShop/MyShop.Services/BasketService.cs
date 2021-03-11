@@ -32,12 +32,11 @@ namespace MyShop.Services
                 {
                     basket = basketContext.Find(basketId);
                 }
-                else
+            } else
+            {
+                if (createIfNull)
                 {
-                    if (createIfNull)
-                    {
-                        basket = CreateNewBasket(httpContext);
-                    }
+                    basket = CreateNewBasket(httpContext);
                 }
             }
             return basket;
@@ -75,10 +74,10 @@ namespace MyShop.Services
             basketContext.Commit();
         }
 
-        public void RemoveToBasket(HttpContextBase httpContext, string productId)
+        public void RemoveToBasket(HttpContextBase httpContext, string Id)
         {
             Basket basket = GetBasket(httpContext, true);
-            BasketItem item = basket.BasketItems.FirstOrDefault(i => i.ProductId == productId);
+            BasketItem item = basket.BasketItems.FirstOrDefault(i => i.Id == Id);
 
             if (item != null)
             {
@@ -94,7 +93,7 @@ namespace MyShop.Services
             {
                 var result = (from b in basket.BasketItems
                               join p in productContext.Collections() on b.ProductId equals p.Id
-                              select new BasketItemViewModel { Id = b.BasketId, Image = p.Image, Price = p.Price, ProductName = p.Name, Quantity = 1 }).
+                              select new BasketItemViewModel { Id = b.Id, Image = p.Image, Price = p.Price, ProductName = p.Name, Quantity = b.Quantity }).
                                ToList();
                 return result;
             }

@@ -10,7 +10,8 @@ namespace MyShop.Core.ViewModels
     {
         public int BasketCount { get; set; }
         public decimal BasketTotalValue { get; set; }
-        public BasketSummaryViewModel() {
+        public BasketSummaryViewModel()
+        {
             BasketCount = 0;
             BasketTotalValue = 0;
         }
@@ -19,4 +20,5 @@ namespace MyShop.Core.ViewModels
             this.BasketTotalValue = basketTotalValue;
             this.BasketCount = basketCount;
         }
+    }
 }
