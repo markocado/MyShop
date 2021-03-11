@@ -1,5 +1,6 @@
 ﻿using MyShop.Core.Contracts;
 using MyShop.Core.Models;
+using MyShop.Core.ViewModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ using System.Web;
 
 namespace MyShop.Services
 {
-   public class BasketService
+    public class BasketService : IBasketService
     {
         IRepository<Product> productContext;
         IRepository<Basket> basketContext;
@@ -27,10 +28,11 @@ namespace MyShop.Services
             if (cookie != null)
             {
                 string basketId = cookie.Value;
-                if(!string.IsNullOrEmpty(basketId))
+                if (!string.IsNullOrEmpty(basketId))
                 {
                     basket = basketContext.Find(basketId);
-                } else
+                }
+                else
                 {
                     if (createIfNull)
                     {
@@ -65,7 +67,7 @@ namespace MyShop.Services
             {
                 item = new BasketItem() { BasketId = basket.Id, ProductId = productId, Quantity = 1 };
                 basket.BasketItems.Add(item);
-            } 
+            }
             else
             {
                 item.Quantity = item.Quantity + 1;
@@ -83,6 +85,42 @@ namespace MyShop.Services
                 basket.BasketItems.Remove(item);
                 basketContext.Commit();
             }
+        }
+
+        public List<BasketItemViewModel> GetBasketItems(HttpContextBase httpContext)
+        {
+            Basket basket = GetBasket(httpContext, false);
+            if (basket != null)
+            {
+                var result = (from b in basket.BasketItems
+                              join p in productContext.Collections() on b.ProductId equals p.Id
+                              select new BasketItemViewModel { Id = b.BasketId, Image = p.Image, Price = p.Price, ProductName = p.Name, Quantity = 1 }).
+                               ToList();
+                return result;
+            }
+            else
+            {
+                return new List<BasketItemViewModel>();
+            }
+        }
+
+        public BasketSummaryViewModel GetBasketSummary(HttpContextBase httpContext)
+        {
+            BasketSummaryViewModel model = new BasketSummaryViewModel(0, 0);
+            Basket basket = GetBasket(httpContext, false);
+            if (basket != null)
+            {
+                int? basketCount = (from b in basket.BasketItems
+                                    select b.Quantity).Sum();
+                decimal? basketTotalValue = (from b in basket.BasketItems
+                                             join p in productContext.Collections() on b.ProductId equals p.Id
+                                             select b.Quantity * p.Price).Sum();
+
+                model.BasketCount = basketCount ?? 0;
+                model.BasketTotalValue = basketTotalValue ?? decimal.Zero;
+            }
+
+            return model;
         }
     }
 }
